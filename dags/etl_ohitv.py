@@ -6,8 +6,8 @@ from datetime import datetime
 
 with DAG(
         dag_id='ohitv_pipeline',
-        start_date=datetime(year=2022, month=1, day=1),
-        schedule_interval='@daily',
+        start_date=datetime(year=2024, month=8, day=1),
+        schedule_interval='@weekly',
         catchup=False) as dag:
 
     crawl = crawl_tasks()

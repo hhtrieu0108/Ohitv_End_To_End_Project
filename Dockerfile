@@ -6,4 +6,3 @@ COPY plugins plugins
 
 # Install additional packages
 RUN pip install -r plugins/requirements.txt
-

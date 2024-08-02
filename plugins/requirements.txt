@@ -2,3 +2,6 @@ psycopg2-binary
 pandas==2.1.4
 bs4
 sqlalchemy==1.4.36
+minio
+fastparquet
+pyarrow
