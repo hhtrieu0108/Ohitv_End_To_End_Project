@@ -1,2 +1,3 @@
 logs/
 plugins/keys.json
+minio_storage/
