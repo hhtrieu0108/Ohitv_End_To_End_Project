@@ -5,33 +5,6 @@ from plugins.minio_service import create_bucket_minio
 from pymongo import MongoClient
 
 
-# def create_client():
-#     from minio_service import Minio
-#     import json
-#
-#     with open('plugins/keys.json', 'r') as file:
-#         keys = json.load(file)
-#     access_key = keys['access_key']
-#     secret_key = keys['secret_key']
-#     client = Minio(
-#         "minio:9000",  # Replace with your MinIO server address
-#         access_key=access_key,
-#         secret_key=secret_key,
-#         secure=False
-#     )
-#
-#     return client
-# def create_bucket_minio(client,minio_bucket):
-#
-#     from minio_service.error import S3Error
-#     try:
-#         if not client.bucket_exists(minio_bucket):
-#             client.make_bucket(minio_bucket)
-#         else:
-#             print(f"Bucket '{minio_bucket}' already exists.")
-#     except S3Error as e:
-#         print(f"Error occurred: {e}")
-
 def load_to_postgres(username,password,host,database,port,table_name):
     """
     definition : import to postgres database and save to local an csv file
