@@ -5,3 +5,4 @@ sqlalchemy==1.4.36
 minio
 fastparquet
 pyarrow
+pymongo

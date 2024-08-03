@@ -14,13 +14,15 @@ x-airflow-common:
     _AIRFLOW_WWW_USER_CREATE: 'true'
     _AIRFLOW_WWW_USER_USERNAME: airflow
     _AIRFLOW_WWW_USER_PASSWORD: airflow
-    PIP_INSTALL_MORE: "psycopg2-binary pandas bs4"
+    PYTHONPATH: /opt/airflow:/opt/airflow
 
   user: "${AIRFLOW_UID:-50000}:0"
   volumes:
     - ${AIRFLOW_PROJ_DIR:-.}/dags:/opt/airflow/dags
     - ${AIRFLOW_PROJ_DIR:-.}/logs:/opt/airflow/logs
     - ${AIRFLOW_PROJ_DIR:-.}/plugins:/opt/airflow/plugins
+  networks:
+    - ohitv
   depends_on:
     &airflow-depends-on
     postgres:
@@ -85,6 +87,8 @@ services:
       retries: 5
       start_period: 5s
     restart: always
+    networks:
+      - ohitv
 
 ### Minio
   minio:
@@ -99,6 +103,11 @@ services:
     environment:
       - MINIO_ROOT_USER=admin12345
       - MINIO_ROOT_PASSWORD=admin12345
+    networks:
+      - ohitv
 
+networks:
+  ohitv:
+    driver: bridge
 volumes:
   postgres-db-volume:
