@@ -50,7 +50,7 @@ def load_tasks():
 
     import json
 
-    with open('plugins/keys.json', 'r') as file:
+    with open('plugins/keys.json', 'r', encoding='utf-8') as file:
         keys = json.load(file)
 
     postgres_user = keys['postgres_user']

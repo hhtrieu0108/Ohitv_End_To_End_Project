@@ -4,7 +4,7 @@ from minio.error import S3Error
 def create_client():
     import json
 
-    with open('plugins/keys.json', 'r') as file:
+    with open('plugins/keys.json', 'r', encoding='utf-8') as file:
         keys = json.load(file)
     access_key = keys['access_key']
     secret_key = keys['secret_key']
