@@ -1,4 +1,4 @@
 logs/
 plugins/keys.json
-minio_storage/
+minio_storage
 .idea/
