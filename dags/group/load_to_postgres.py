@@ -15,8 +15,10 @@ def load_to_postgres(username,password,host,database,port,table_name):
     minio_bucket = 'ohitv-processed'
     client = create_client()
     create_bucket_minio(client=client, minio_bucket=minio_bucket)
+
     processed_ohitv_object = client.get_object(minio_bucket,"ohitv_request_processed.parquet")
     processed_ohitv_df = pd.read_parquet(BytesIO(processed_ohitv_object.read()))
+
     from sqlalchemy import create_engine
     db_connection_string = f"postgresql+psycopg2://{username}:{password}@{host}:{port}/{database}" # Connect to database
     engine = create_engine(db_connection_string)
@@ -29,21 +31,24 @@ def load_to_mongodb(username,password,database,collection,host,port):
     minio_bucket = 'ohitv-processed'
     client = create_client()
     create_bucket_minio(client=client, minio_bucket=minio_bucket)
+
     processed_ohitv_object = client.get_object(minio_bucket,"ohitv_request_processed.parquet")
     processed_ohitv_df = pd.read_parquet(BytesIO(processed_ohitv_object.read()))
     processed_ohitv_df['date'] = processed_ohitv_df['date'].fillna(value='None')
+
     connection_string = f"mongodb://{username}:{password}@{host}:{port}/?authSource=admin"
     client = MongoClient(connection_string)
     db = client[f"{database}"]
     collection = db[f"{collection}"]
+
     data_dict = processed_ohitv_df.to_dict('records')
 
-    if collection.count_documents({}) == 0:  # Check if collection is empty
-        collection.insert_many(data_dict)  # Insert data
-        print("Data inserted into MongoDB.")
-    else:
-        print("Collection already exists. Data not inserted.")
+    if collection.count_documents({}) > 0:
+        collection.delete_many({})  # Remove all existing documents
+        print("Existing data removed from MongoDB.")
 
+    collection.insert_many(data_dict)  # Insert new data
+    print("Data inserted into MongoDB.")
     client.close()
 
 def load_tasks():

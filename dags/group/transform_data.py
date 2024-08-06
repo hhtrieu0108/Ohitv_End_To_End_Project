@@ -26,6 +26,7 @@ def processing():
     import pandas as pd
     import io
     from io import BytesIO
+
     minio_bucket = 'ohitv-raw'
     client = create_client()
     create_bucket_minio(client=client,minio_bucket=minio_bucket)
@@ -37,6 +38,7 @@ def processing():
     processed_df = new_df.explode('genre')
     processed_df['rating'] = processed_df['rating'].astype('float')
     processed_minio_bucket = 'ohitv-processed'
+
     create_bucket_minio(client=client,minio_bucket=processed_minio_bucket)
 
     processed_df_parquet = processed_df.to_parquet(index=False)
