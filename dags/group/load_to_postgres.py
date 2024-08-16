@@ -22,7 +22,20 @@ def load_to_postgres(username,password,host,database,port,table_name):
     from sqlalchemy import create_engine
     db_connection_string = f"postgresql+psycopg2://{username}:{password}@{host}:{port}/{database}" # Connect to database
     engine = create_engine(db_connection_string)
-    processed_ohitv_df.to_sql(f"{table_name}", engine, if_exists='replace', index=False)
+    # processed_ohitv_df.to_sql(f"{table_name}", engine, if_exists='replace', index=False)
+    
+    # Load existing titles from PostgreSQL
+    existing_titles_query = f"SELECT title FROM {table_name}"
+    existing_titles_df = pd.read_sql(existing_titles_query, engine)
+
+    # Identify new records by excluding existing titles
+    new_records_df = processed_ohitv_df[~processed_ohitv_df['title'].isin(existing_titles_df['title'])]
+
+    if not new_records_df.empty:
+        new_records_df.to_sql(table_name, engine, if_exists='append', index=False)
+        print(f"Appended {len(new_records_df)} new records to the '{table_name}' table.")
+    else:
+        print("No new records to append.")
 
 def load_to_mongodb(username,password,database,collection,host,port):
     import pandas as pd
@@ -43,12 +56,21 @@ def load_to_mongodb(username,password,database,collection,host,port):
 
     data_dict = processed_ohitv_df.to_dict('records')
 
-    if collection.count_documents({}) > 0:
-        collection.delete_many({})  # Remove all existing documents
-        print("Existing data removed from MongoDB.")
 
-    collection.insert_many(data_dict)  # Insert new data
-    print("Data inserted into MongoDB.")
+    # Find existing titles in MongoDB
+    existing_titles_cursor = collection.find({}, {"title": 1, "_id": 0})
+    existing_titles = [doc["title"] for doc in existing_titles_cursor]
+
+    # Identify new records by excluding existing titles
+    new_records_df = processed_ohitv_df[~processed_ohitv_df['title'].isin(existing_titles)]
+
+    if not new_records_df.empty:
+        data_dict = new_records_df.to_dict('records')
+        collection.insert_many(data_dict)
+        print(f"Inserted {len(new_records_df)} new records into the MongoDB collection '{collection}'.")
+    else:
+        print("No new records to insert.")
+
     client.close()
 
 def load_tasks():
