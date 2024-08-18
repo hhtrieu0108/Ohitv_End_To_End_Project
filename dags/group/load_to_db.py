@@ -22,6 +22,7 @@ def load_to_postgres(username,password,host,database,port,table_name):
 
     current_date = datetime.now().date()
     processed_ohitv_df['date_crawl'] = current_date
+    processed_ohitv_df['quality'] = processed_ohitv_df['quality'].str.replace(" ","")
 
     from sqlalchemy import create_engine
     db_connection_string = f"postgresql+psycopg2://{username}:{password}@{host}:{port}/{database}" # Connect to database
@@ -62,6 +63,7 @@ def load_to_mongodb(username,password,database,collection,host,port):
     
     current_date = datetime.now()
     processed_ohitv_df['date_crawl'] = current_date
+    processed_ohitv_df['quality'] = processed_ohitv_df['quality'].str.replace(" ","")
 
     connection_string = f"mongodb://{username}:{password}@{host}:{port}/?authSource=admin"
     client = MongoClient(connection_string)
