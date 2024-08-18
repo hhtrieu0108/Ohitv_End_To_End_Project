@@ -1,7 +1,7 @@
 from airflow import DAG
 from group.crawl_ohitv import crawl_tasks
 from group.transform_data import processing_tasks
-from group.load_to_postgres import load_tasks
+from dags.group.load_to_db import load_tasks
 from datetime import datetime
 
 with DAG(
