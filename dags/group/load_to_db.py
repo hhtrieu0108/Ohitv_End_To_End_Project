@@ -36,7 +36,10 @@ def load_to_postgres(username,password,host,database,port,table_name):
         print(e)
         processed_ohitv_df.to_sql(f"{table_name}", engine, if_exists='replace', index=False)
         return ("create table and inserted already")
-        
+    
+    if len(existing_titles_df) == 0:
+        processed_ohitv_df.to_sql(f"{table_name}", engine, if_exists='replace', index=False)
+        return ("inserted already")
 
     # Identify new records by excluding existing titles
     new_records_df = processed_ohitv_df[~processed_ohitv_df['title'].isin(existing_titles_df['title'])]
