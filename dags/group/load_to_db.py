@@ -5,7 +5,7 @@ from plugins.minio_service import create_bucket_minio
 from pymongo import MongoClient
 
 
-def load_to_postgres(username,password,host,database,port,table_name):
+def load_to_postgres(username, password, host, database, port, table_name):
     """
     definition : import to postgres database and save to local an csv file
     """
@@ -51,7 +51,7 @@ def load_to_postgres(username,password,host,database,port,table_name):
     else:
         print("No new records to append.")
 
-def load_to_mongodb(username,password,database,collection,host,port):
+def load_to_mongodb(username, password, database, collection, host, port):
     import pandas as pd
     from io import BytesIO
     from datetime import datetime
@@ -111,6 +111,7 @@ def load_tasks():
             group_id="load",
             tooltip="load dataframe to postgres"
     ) as group:
+
         load_to_postgres_task = PythonOperator(
             task_id='load_to_postgres',
             python_callable=load_to_postgres,
