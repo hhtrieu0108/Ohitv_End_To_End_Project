@@ -11,6 +11,7 @@ def load_to_postgres(username,password,host,database,port,table_name):
     """
     import pandas as pd
     from io import BytesIO
+    from datetime import datetime
 
     minio_bucket = 'ohitv-processed'
     client = create_client()
@@ -19,14 +20,22 @@ def load_to_postgres(username,password,host,database,port,table_name):
     processed_ohitv_object = client.get_object(minio_bucket,"ohitv_request_processed.parquet")
     processed_ohitv_df = pd.read_parquet(BytesIO(processed_ohitv_object.read()))
 
+    current_date = datetime.now().date()
+    processed_ohitv_df['date_crawl'] = current_date
+
     from sqlalchemy import create_engine
     db_connection_string = f"postgresql+psycopg2://{username}:{password}@{host}:{port}/{database}" # Connect to database
     engine = create_engine(db_connection_string)
-    # processed_ohitv_df.to_sql(f"{table_name}", engine, if_exists='replace', index=False)
-    
-    # Load existing titles from PostgreSQL
-    existing_titles_query = f"SELECT title FROM {table_name}"
-    existing_titles_df = pd.read_sql(existing_titles_query, engine)
+
+    try:
+        # Load existing titles from PostgreSQL
+        existing_titles_query = f"SELECT title FROM {table_name}"
+        existing_titles_df = pd.read_sql(existing_titles_query, engine)
+    except Exception as e:
+        print(e)
+        processed_ohitv_df.to_sql(f"{table_name}", engine, if_exists='replace', index=False)
+        return ("create table and inserted already")
+        
 
     # Identify new records by excluding existing titles
     new_records_df = processed_ohitv_df[~processed_ohitv_df['title'].isin(existing_titles_df['title'])]
@@ -41,6 +50,7 @@ def load_to_postgres(username,password,host,database,port,table_name):
 def load_to_mongodb(username,password,database,collection,host,port):
     import pandas as pd
     from io import BytesIO
+    from datetime import datetime
 
     minio_bucket = 'ohitv-processed'
     client = create_client()
@@ -49,6 +59,9 @@ def load_to_mongodb(username,password,database,collection,host,port):
     processed_ohitv_object = client.get_object(minio_bucket,"ohitv_request_processed.parquet")
     processed_ohitv_df = pd.read_parquet(BytesIO(processed_ohitv_object.read()))
     processed_ohitv_df['date'] = processed_ohitv_df['date'].fillna(value='None')
+    
+    current_date = datetime.now()
+    processed_ohitv_df['date_crawl'] = current_date
 
     connection_string = f"mongodb://{username}:{password}@{host}:{port}/?authSource=admin"
     client = MongoClient(connection_string)
@@ -57,10 +70,12 @@ def load_to_mongodb(username,password,database,collection,host,port):
 
     data_dict = processed_ohitv_df.to_dict('records')
 
-
-    # Find existing titles in MongoDB
     existing_titles_cursor = collection.find({}, {"title": 1, "_id": 0})
     existing_titles = [doc["title"] for doc in existing_titles_cursor]
+
+    if len(existing_titles) == 0:
+        collection.insert_many(data_dict)
+        return ("create table and inserted already")
 
     # Identify new records by excluding existing titles
     new_records_df = processed_ohitv_df[~processed_ohitv_df['title'].isin(existing_titles)]
