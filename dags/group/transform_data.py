@@ -17,8 +17,6 @@ def convert_to_dataframe(ti):
 
     df_parquet = df.to_parquet(index=False)
 
-    (df[df['title'] == 'Dự Án Mật: Thảm Họa Trên Cầu'])
-
     client.put_object(
         bucket_name=minio_bucket,
         object_name="ohitv_request_raw.parquet",
