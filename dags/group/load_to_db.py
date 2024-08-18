@@ -47,7 +47,7 @@ def load_to_postgres(username,password,host,database,port,table_name):
     if not new_records_df.empty:
         new_records_df.to_sql(table_name, engine, if_exists='append', index=False)
         print(f"Appended {len(new_records_df)} new records to the '{table_name}' table.")
-        print(new_records_df)
+        print(new_records_df['title'].drop_duplicates())
     else:
         print("No new records to append.")
 
@@ -89,7 +89,7 @@ def load_to_mongodb(username,password,database,collection,host,port):
         data_dict = new_records_df.to_dict('records')
         collection.insert_many(data_dict)
         print(f"Inserted {len(new_records_df)} new records into the MongoDB collection '{collection}'.")
-        print(new_records_df)
+        print(new_records_df['title'].drop_duplicates())
     else:
         print("No new records to insert.")
 
