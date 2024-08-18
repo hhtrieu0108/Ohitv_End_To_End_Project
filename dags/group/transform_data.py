@@ -13,7 +13,11 @@ def convert_to_dataframe(ti):
 
     df_value = ti.xcom_pull(key='crawl',task_ids='crawling.crawl_all')
     df = pd.DataFrame(df_value,columns=['title','links','date','rating','quality','genre','short_description'])
+    df.drop_duplicates("title",inplace=True)
+
     df_parquet = df.to_parquet(index=False)
+
+    (df[df['title'] == 'Dự Án Mật: Thảm Họa Trên Cầu'])
 
     client.put_object(
         bucket_name=minio_bucket,
