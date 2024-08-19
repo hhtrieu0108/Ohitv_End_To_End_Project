@@ -30,7 +30,7 @@ def load_to_postgres(username, password, host, database, port, table_name):
 
     try:
         # Load existing titles from PostgreSQL
-        existing_titles_query = f"SELECT title FROM {table_name}"
+        existing_titles_query = f"SELECT id FROM {table_name}"
         existing_titles_df = pd.read_sql(existing_titles_query, engine)
     except Exception as e:
         print(e)
@@ -42,12 +42,12 @@ def load_to_postgres(username, password, host, database, port, table_name):
         return ("inserted already")
 
     # Identify new records by excluding existing titles
-    new_records_df = processed_ohitv_df[~processed_ohitv_df['title'].isin(existing_titles_df['title'])]
+    new_records_df = processed_ohitv_df[~processed_ohitv_df['id'].isin(existing_titles_df['id'])]
 
     if not new_records_df.empty:
         new_records_df.to_sql(table_name, engine, if_exists='append', index=False)
         print(f"Appended {len(new_records_df)} new records to the '{table_name}' table.")
-        print(new_records_df['title'].drop_duplicates())
+        print(new_records_df[['id', 'title']].drop_duplicates('id'))
     else:
         print("No new records to append.")
 
@@ -75,21 +75,21 @@ def load_to_mongodb(username, password, database, collection, host, port):
 
     data_dict = processed_ohitv_df.to_dict('records')
 
-    existing_titles_cursor = collection.find({}, {"title": 1, "_id": 0})
-    existing_titles = [doc["title"] for doc in existing_titles_cursor]
+    existing_id_cursor = collection.find({}, {"id": 1, "_id": 0})
+    existing_id = [doc["id"] for doc in existing_id_cursor]
 
-    if len(existing_titles) == 0:
+    if len(existing_id) == 0:
         collection.insert_many(data_dict)
         return ("create table and inserted already")
 
     # Identify new records by excluding existing titles
-    new_records_df = processed_ohitv_df[~processed_ohitv_df['title'].isin(existing_titles)]
+    new_records_df = processed_ohitv_df[~processed_ohitv_df['id'].isin(existing_id)]
 
     if not new_records_df.empty:
         data_dict = new_records_df.to_dict('records')
         collection.insert_many(data_dict)
         print(f"Inserted {len(new_records_df)} new records into the MongoDB collection '{collection}'.")
-        print(new_records_df['title'].drop_duplicates())
+        print(new_records_df[['id', 'title']].drop_duplicates())
     else:
         print("No new records to insert.")
 
