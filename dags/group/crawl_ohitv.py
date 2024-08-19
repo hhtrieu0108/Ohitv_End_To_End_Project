@@ -25,6 +25,22 @@ def get_page(soup: BeautifulSoup) -> list:
             pages.append(page_href['href'])
     return pages
 
+
+def crawl_id(kind_href: list) -> list:
+    id = []
+    for link in kind_href:
+        soup = get_soup(link)
+        data_html = soup.find('div',class_='items normal').find_all('article')
+        id_1 = [id_param['id'] for id_param in data_html]
+        id.extend(id_1)
+        pages = get_page(soup=soup)
+        for page in pages:
+            soup = get_soup(page)
+            data_html = soup.find('div',class_='items normal').find_all('article')
+            id_2 = [id_param['id'] for id_param in data_html]
+            id.extend(id_2)
+    return id
+
 def crawl_title(kind_href: list) -> list:
     title = []
     for link in kind_href:
@@ -134,6 +150,7 @@ def crawl_short_description(kind_href: list) -> list:
 
 def crawl_all(ti):
     kind_href = ti.xcom_pull(key='get_url',task_ids='crawling.get_url')
+    id = crawl_id(kind_href=kind_href)
     title = crawl_title(kind_href=kind_href)
     film_link = crawl_film_link(kind_href=kind_href)
     date = crawl_date(kind_href=kind_href)
@@ -141,7 +158,7 @@ def crawl_all(ti):
     quality = crawl_quality(kind_href=kind_href)
     genre = crawl_genre(kind_href=kind_href)
     short_des = crawl_short_description(kind_href=kind_href)
-    ti.xcom_push(key='crawl',value=list(zip(title,film_link,date,rating,quality,genre,short_des)))
+    ti.xcom_push(key='crawl',value=list(zip(id, title, film_link, date, rating, quality, genre, short_des)))
 
 def crawl_tasks():
     with TaskGroup(

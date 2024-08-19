@@ -62,8 +62,8 @@ def load_to_mongodb(username, password, database, collection, host, port):
 
     processed_ohitv_object = client.get_object(minio_bucket,"ohitv_request_processed.parquet")
     processed_ohitv_df = pd.read_parquet(BytesIO(processed_ohitv_object.read()))
-    processed_ohitv_df['date'] = processed_ohitv_df['date'].fillna(value='None')
-    
+    processed_ohitv_df['published_date'] = processed_ohitv_df['published_date'].fillna(value='None')
+
     current_date = datetime.now()
     processed_ohitv_df['date_crawl'] = current_date
     processed_ohitv_df['quality'] = processed_ohitv_df['quality'].str.replace(" ","")

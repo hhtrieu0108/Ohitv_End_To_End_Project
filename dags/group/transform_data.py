@@ -12,7 +12,7 @@ def convert_to_dataframe(ti):
     create_bucket_minio(client=client,minio_bucket=minio_bucket)
 
     df_value = ti.xcom_pull(key='crawl',task_ids='crawling.crawl_all')
-    df = pd.DataFrame(df_value,columns=['title','links','date','rating','quality','genre','short_description'])
+    df = pd.DataFrame(df_value,columns=['id', 'title', 'links', 'published_date', 'rating', 'quality', 'genre', 'short_description'])
     df.drop_duplicates("title",inplace=True)
 
     df_parquet = df.to_parquet(index=False)
@@ -36,7 +36,7 @@ def processing():
     raw_ohitv_object = client.get_object(minio_bucket, "ohitv_request_raw.parquet")
     df = pd.read_parquet(BytesIO(raw_ohitv_object.read()))
     new_df = df.copy()
-    new_df['date'] = pd.to_datetime(new_df['date'], format='%d/%m/%Y', errors='coerce')
+    new_df['published_date'] = pd.to_datetime(new_df['published_date'], format='%d/%m/%Y', errors='coerce')
     processed_df = new_df.explode('genre')
     processed_df['rating'] = processed_df['rating'].astype('float')
     processed_minio_bucket = 'ohitv-processed'
