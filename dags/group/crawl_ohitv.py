@@ -10,7 +10,7 @@ def get_soup(url: str) -> BeautifulSoup:
     return soup
 
 def get_url(ti) -> list:
-    url = "https://ohitv.net/"
+    url = "https://ohitv.info/"
     soup = get_soup(url)
     kind_menu = soup.find_all('ul',class_='sub-menu')[1].find_all('a',href=True)
     kind_link = [link for link in kind_menu]
