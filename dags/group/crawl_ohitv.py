@@ -17,26 +17,34 @@ def get_url(ti) -> list:
     kind_href = [link['href'] for link in kind_link]
     ti.xcom_push(key='get_url',value=kind_href)
 
-def get_page(soup: BeautifulSoup) -> list:
+def get_page(kind: str, soup: BeautifulSoup) -> list:
     pages = []
-    page_list = soup.find_all('div',class_='pagination')
-    for page_number in page_list:
-        for page_href in page_number.find_all('a',href=True):
-            pages.append(page_href['href'])
+    try:
+        page_element = soup.find('div',class_='pagination').find('span').text
+        number_of_page = page_element.split(' ')[3]
+    except:
+        number_of_page = 1
+    for page_number in range(1, int(number_of_page) + 1):
+        pages.append(f"https://ohitv.info/the-loai/{kind}/page/{page_number}")
     return pages
 
 
 def crawl_id(kind_href: list) -> list:
     id = []
     for link in kind_href:
+        print(link)
         soup = get_soup(link)
         data_html = soup.find('div',class_='items normal').find_all('article')
+        print(f"first page films : {len(data_html)}")
         id_1 = [id_param['id'] for id_param in data_html]
         id.extend(id_1)
-        pages = get_page(soup=soup)
+        kind = link.split('/')[4]
+        pages = get_page(kind=kind,soup=soup)
+        print(len(pages))
         for page in pages:
             soup = get_soup(page)
             data_html = soup.find('div',class_='items normal').find_all('article')
+            print(f"next page film : {len(data_html)}")
             id_2 = [id_param['id'] for id_param in data_html]
             id.extend(id_2)
     return id
@@ -48,7 +56,8 @@ def crawl_title(kind_href: list) -> list:
         data_html = soup.find('div',class_='items normal').find_all('div',class_='data')
         title_1 = [title_param.find('h3').text for title_param in data_html]
         title.extend(title_1)
-        pages = get_page(soup=soup)
+        kind = link.split('/')[4]
+        pages = get_page(kind=kind,soup=soup)
         for page in pages:
             soup = get_soup(page)
             data_html = soup.find('div',class_='items normal').find_all('div',class_='data')
@@ -63,7 +72,8 @@ def crawl_film_link(kind_href: list) -> list:
         data_html = soup.find('div',class_='items normal').find_all('div',class_='data')
         film_link_1 = [link_param.find('h3').find('a',href=True)['href'] for link_param in data_html]
         film_link.extend(film_link_1)
-        pages = get_page(soup=soup)
+        kind = link.split('/')[4]
+        pages = get_page(kind=kind,soup=soup)
         for page in pages:
             soup = get_soup(page)
             data_html = soup.find('div',class_='items normal').find_all('div',class_='data')
@@ -78,7 +88,8 @@ def crawl_date(kind_href: list) -> list:
         data_html = soup.find('div',class_='items normal').find_all('div',class_='data')
         date_1 = [date_param.find('span').text for date_param in data_html]
         date.extend(date_1)
-        pages = get_page(soup=soup)
+        kind = link.split('/')[4]
+        pages = get_page(kind=kind,soup=soup)
         for page in pages:
             soup = get_soup(page)
             data_html = soup.find('div',class_='items normal').find_all('div',class_='data')
@@ -93,7 +104,8 @@ def crawl_rating(kind_href: list) -> list:
         rating_data = soup.find_all('div',class_='rating')
         rating_1 = [rating_param.text for rating_param in rating_data]
         rating.extend(rating_1)
-        pages = get_page(soup=soup)
+        kind = link.split('/')[4]
+        pages = get_page(kind=kind,soup=soup)
         for page in pages:
             soup = get_soup(page)
             rating_data = soup.find_all('div',class_='rating')
@@ -108,7 +120,8 @@ def crawl_quality(kind_href: list) -> list:
         quality_data = soup.find_all('div',class_='mepo')
         quality_1 = [quality_param.text for quality_param in quality_data]
         quality.extend(quality_1)
-        pages = get_page(soup=soup)
+        kind = link.split('/')[4]
+        pages = get_page(kind=kind,soup=soup)
         for page in pages:
             soup = get_soup(page)
             quality_data = soup.find_all('div',class_='mepo')
@@ -124,7 +137,8 @@ def crawl_genre(kind_href: list) -> list:
         for genre_data_sub in genre_data:
             sub_type = [text.text for text in genre_data_sub]
             genre.append(sub_type)
-        pages = get_page(soup=soup)
+        kind = link.split('/')[4]
+        pages = get_page(kind=kind,soup=soup)
         for page in pages:
             soup = get_soup(page)
             genre_data = soup.find_all('div',class_='mta')
@@ -140,7 +154,8 @@ def crawl_short_description(kind_href: list) -> list:
         short_des_data = soup.find_all('div',class_='texto')
         short_des_1 = [short.text for short in short_des_data]
         short_des.extend(short_des_1)
-        pages = get_page(soup=soup)
+        kind = link.split('/')[4]
+        pages = get_page(kind=kind,soup=soup)
         for page in pages:
             soup = get_soup(page)
             short_des_data = soup.find_all('div',class_='texto')
@@ -158,6 +173,7 @@ def crawl_all(ti):
     quality = crawl_quality(kind_href=kind_href)
     genre = crawl_genre(kind_href=kind_href)
     short_des = crawl_short_description(kind_href=kind_href)
+    print("Going to push xcom...")
     ti.xcom_push(key='crawl',value=list(zip(id, title, film_link, date, rating, quality, genre, short_des)))
 
 def crawl_tasks():
