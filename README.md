@@ -51,7 +51,7 @@ Crawl film information from [Ohitv.info](https://ohitv.info) and incrementally l
 ## Setup Guide
 
 ### 1. Install Docker
-- Follow the instructions to install Docker from the [official Docker website](https://www.docker.com/).
+- Follow the instructions to install Docker from the [Docker website](https://www.docker.com/).
 
 ---
 
