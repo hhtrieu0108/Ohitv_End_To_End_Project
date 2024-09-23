@@ -1,8 +1,8 @@
-psycopg2-binary
+psycopg2-binary==2.9.9
 pandas==2.1.4
-bs4
+bs4==0.0.2
 sqlalchemy==1.4.36
-minio
-fastparquet
-pyarrow
-pymongo
+minio==7.2.7
+fastparquet==2024.5.0
+pyarrow==17.0.0
+pymongo==4.8.0
