@@ -5,11 +5,31 @@ import requests
 from bs4 import BeautifulSoup
 
 def get_soup(url: str) -> BeautifulSoup:
+    """
+    Fetches and parses HTML content from a given URL.
+
+    Args:
+        url (str): The URL to retrieve and parse.
+
+    Returns:
+        BeautifulSoup: A BeautifulSoup object containing the parsed HTML.
+    """
+
     html = requests.get(url)
     soup = BeautifulSoup(html.text,'html.parser')
     return soup
 
-def get_url(ti) -> list:
+def get_url(ti) -> None:
+    """
+    Retrieves URLs for film categories from the main page and pushes them to XCom.
+
+    Args:
+        ti: Task instance to push data to XCom.
+
+    Returns:
+        None
+    """
+
     url = "https://ohitv.info/"
     soup = get_soup(url)
     kind_menu = soup.find_all('ul',class_='sub-menu')[1].find_all('a',href=True)
@@ -18,6 +38,17 @@ def get_url(ti) -> list:
     ti.xcom_push(key='get_url',value=kind_href)
 
 def get_page(kind: str, soup: BeautifulSoup) -> list:
+    """
+    Generates pagination URLs for a given film category.
+
+    Args:
+        kind (str): The category of films.
+        soup (BeautifulSoup): Parsed HTML of the category page.
+
+    Returns:
+        list: A list of pagination URLs.
+    """
+
     pages = []
     try:
         page_element = soup.find('div',class_='pagination').find('span').text
@@ -30,6 +61,16 @@ def get_page(kind: str, soup: BeautifulSoup) -> list:
 
 
 def crawl_id(kind_href: list) -> list:
+    """
+    Extracts film IDs from category pages.
+
+    Args:
+        kind_href (list): List of category URLs.
+
+    Returns:
+        list: A list of film IDs.
+    """
+    
     id = []
     for link in kind_href:
         print(link)
@@ -50,6 +91,16 @@ def crawl_id(kind_href: list) -> list:
     return id
 
 def crawl_title(kind_href: list) -> list:
+    """
+    Extracts film titles from category pages.
+
+    Args:
+        kind_href (list): List of category URLs.
+
+    Returns:
+        list: A list of film titles.
+    """
+
     title = []
     for link in kind_href:
         soup = get_soup(link)
@@ -66,6 +117,16 @@ def crawl_title(kind_href: list) -> list:
     return title
 
 def crawl_film_link(kind_href: list) -> list:
+    """
+    Extracts film links from category pages.
+
+    Args:
+        kind_href (list): List of category URLs.
+
+    Returns:
+        list: A list of film links.
+    """
+
     film_link = []
     for link in kind_href:
         soup = get_soup(link)
@@ -82,6 +143,16 @@ def crawl_film_link(kind_href: list) -> list:
     return film_link
 
 def crawl_date(kind_href: list) -> list:
+    """
+    Extracts film release dates from category pages.
+
+    Args:
+        kind_href (list): List of category URLs.
+
+    Returns:
+        list: A list of film release dates.
+    """
+
     date = []
     for link in kind_href:
         soup = get_soup(link)
@@ -98,6 +169,16 @@ def crawl_date(kind_href: list) -> list:
     return date
 
 def crawl_rating(kind_href: list) -> list:
+    """
+    Extracts film ratings from category pages.
+
+    Args:
+        kind_href (list): List of category URLs.
+
+    Returns:
+        list: A list of film ratings.
+    """
+
     rating = []
     for link in kind_href:
         soup = get_soup(link)
@@ -114,6 +195,16 @@ def crawl_rating(kind_href: list) -> list:
     return rating
 
 def crawl_quality(kind_href: list) -> list:
+    """
+    Extracts film qualities from category pages.
+
+    Args:
+        kind_href (list): List of category URLs.
+
+    Returns:
+        list: A list of film qualities.
+    """
+
     quality = []
     for link in kind_href:
         soup = get_soup(link)
@@ -130,6 +221,16 @@ def crawl_quality(kind_href: list) -> list:
     return quality
 
 def crawl_genre(kind_href: list) -> list:
+    """
+    Extracts film genres from category pages.
+
+    Args:
+        kind_href (list): List of category URLs.
+
+    Returns:
+        list: A list of film genres.
+    """
+
     genre = []
     for link in kind_href:
         soup = get_soup(link)
@@ -148,6 +249,16 @@ def crawl_genre(kind_href: list) -> list:
     return genre
 
 def crawl_short_description(kind_href: list) -> list:
+    """
+    Extracts short descriptions of films from category pages.
+
+    Args:
+        kind_href (list): List of category URLs.
+
+    Returns:
+        list: A list of short film descriptions.
+    """
+
     short_des = []
     for link in kind_href:
         soup = get_soup(link)
@@ -163,7 +274,7 @@ def crawl_short_description(kind_href: list) -> list:
             short_des.extend(short_des_2)
     return short_des
 
-def crawl_all(ti):
+def crawl_all(ti) -> None:
     kind_href = ti.xcom_pull(key='get_url',task_ids='crawling.get_url')
     id = crawl_id(kind_href=kind_href)
     title = crawl_title(kind_href=kind_href)

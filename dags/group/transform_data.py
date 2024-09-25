@@ -3,7 +3,14 @@ from airflow.utils.task_group import TaskGroup
 from plugins.minio_service import create_client
 from plugins.minio_service import create_bucket_minio
 
-def convert_to_dataframe(ti):
+def convert_to_dataframe(ti) -> None:
+    """
+    Converts crawled film data into a Pandas DataFrame and uploads it as a Parquet file to MinIO.
+        
+    Returns:
+        None
+    """    
+    
     import pandas as pd
     import io
 
@@ -24,7 +31,14 @@ def convert_to_dataframe(ti):
         length=len(df_parquet)
     )
 
-def processing():
+def processing() -> None:
+    """
+    Processes the raw film data from MinIO, converting the published date and exploding genres.
+
+    Returns:
+        None
+    """    
+
     import pandas as pd
     import io
     from io import BytesIO

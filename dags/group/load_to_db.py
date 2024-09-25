@@ -5,13 +5,37 @@ from plugins.minio_service import create_bucket_minio
 from pymongo import MongoClient
 
 
-def load_to_postgres(username, password, host, database, port, table_name):
+def load_to_postgres(username: str, 
+                    password: str, 
+                    host: str, 
+                    database: str, 
+                    port: str, 
+                    table_name: str) -> None:
     """
-    definition : import to postgres database and save to local an csv file
+    Load data into a PostgreSQL database from a MinIO bucket.
+
+    This function retrieves a processed Parquet file from a specified MinIO bucket, 
+    loads it into a Pandas DataFrame, and inserts new records into a PostgreSQL 
+    database table. If the database does not exist, it will be created. The function 
+    checks for existing records in the specified table and only inserts new records 
+    that are not already present.
+
+    Parameters:
+    - username (str): The username for authenticating with the PostgreSQL database.
+    - password (str): The password for authenticating with the PostgreSQL database.
+    - host (str): The hostname or IP address of the PostgreSQL server.
+    - database (str): The name of the PostgreSQL database to create/use.
+    - port (str): The port number for connecting to the PostgreSQL server.
+    - table_name (str): The name of the table within the database where data will be inserted.
+
+    Returns:
+    - None: The function performs database operations and does not return a value.
     """
     import pandas as pd
     from io import BytesIO
     from datetime import datetime
+    from sqlalchemy import create_engine
+    from sqlalchemy.exc import ProgrammingError
 
     minio_bucket = 'ohitv-processed'
     client = create_client()
@@ -24,8 +48,25 @@ def load_to_postgres(username, password, host, database, port, table_name):
     processed_ohitv_df['date_crawl'] = current_date
     processed_ohitv_df['quality'] = processed_ohitv_df['quality'].str.replace(" ","")
 
-    from sqlalchemy import create_engine
-    db_connection_string = f"postgresql+psycopg2://{username}:{password}@{host}:{port}/{database}" # Connect to database
+    # Create connection string for the PostgreSQL database
+    db_connection_string = f"postgresql+psycopg2://{username}:{password}@{host}:{port}/postgres"  # Connect to the default 'postgres' database
+    engine = create_engine(db_connection_string)
+
+    # Create database if not exists
+    try:
+        # Establish a separate connection to execute the CREATE DATABASE command
+        with engine.connect() as conn:
+            conn.execute("COMMIT")
+            conn.execute(f"CREATE DATABASE {database};")
+            print(f"Database '{database}' created.")
+    except ProgrammingError as e:
+        if 'database already exists' in str(e):
+            print(f"Database '{database}' already exists.")
+        else:
+            print("Error occurred:", e)
+
+    # Now connect to the newly created or existing database
+    db_connection_string = f"postgresql+psycopg2://{username}:{password}@{host}:{port}/{database}"
     engine = create_engine(db_connection_string)
 
     try:
@@ -51,7 +92,32 @@ def load_to_postgres(username, password, host, database, port, table_name):
     else:
         print("No new records to append.")
 
-def load_to_mongodb(username, password, database, collection, host, port):
+def load_to_mongodb(username: str, 
+                    password: str, 
+                    database: str, 
+                    collection: str, 
+                    host: str, 
+                    port: str) -> None:
+    """
+    Load data into a MongoDB collection from a MinIO bucket.
+
+    This function retrieves a processed Parquet file from a specified MinIO bucket, 
+    loads it into a Pandas DataFrame, and inserts new records into a MongoDB collection. 
+    If the collection is empty, it inserts all records from the DataFrame. 
+    Otherwise, it only inserts records that are not already present in the collection.
+
+    Parameters:
+    - username (str): The username for authenticating with the MongoDB database.
+    - password (str): The password for authenticating with the MongoDB database.
+    - database (str): The name of the MongoDB database to use.
+    - collection (str): The name of the collection within the database where data will be inserted.
+    - host (str): The hostname or IP address of the MongoDB server.
+    - port (str): The port number for connecting to the MongoDB server.
+
+    Returns:
+    - None: This function does not return a value but performs database operations, 
+            including inserting records into the MongoDB collection.
+    """
     import pandas as pd
     from io import BytesIO
     from datetime import datetime
@@ -120,7 +186,7 @@ def load_tasks():
                 'password': postgres_password,
                 'host': 'postgres',
                 'port': '5432',
-                'database': 'airflow',
+                'database': 'ohitv_database',
                 'table_name': 'ohitv_request'
             }
         )
