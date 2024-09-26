@@ -79,6 +79,7 @@ services:
       - "80:80"
     volumes:
       - pgadmin_data:/var/lib/pgadmin
+    restart: 'always'
     networks:
       - ohitv
 ### POSTGRES ###
