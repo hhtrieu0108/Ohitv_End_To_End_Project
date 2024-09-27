@@ -8,10 +8,8 @@ with DAG(
         dag_id='ohitv_pipeline',
         start_date=datetime(year=2024, 
                             month=8, 
-                            day=1, 
-                            hour=9, 
-                            minute=30),
-        schedule_interval='@daily',
+                            day=1),
+        schedule_interval='30 9 * * *',
         catchup=False) as dag:
 
     crawl = crawl_tasks()
