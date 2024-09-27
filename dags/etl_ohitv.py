@@ -6,7 +6,11 @@ from datetime import datetime
 
 with DAG(
         dag_id='ohitv_pipeline',
-        start_date=datetime(year=2024, month=8, day=1),
+        start_date=datetime(year=2024, 
+                            month=8, 
+                            day=1, 
+                            hour=9, 
+                            minute=30),
         schedule_interval='@daily',
         catchup=False) as dag:
 
