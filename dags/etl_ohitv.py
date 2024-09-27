@@ -7,7 +7,7 @@ from datetime import datetime
 with DAG(
         dag_id='ohitv_pipeline',
         start_date=datetime(year=2024, 
-                            month=8, 
+                            month=9, 
                             day=27),
         schedule_interval='30 9 * * *',
         catchup=False) as dag:
