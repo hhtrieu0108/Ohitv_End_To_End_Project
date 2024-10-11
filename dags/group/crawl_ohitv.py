@@ -75,7 +75,10 @@ def crawl_id(kind_href: list) -> list:
     for link in kind_href:
         print(link)
         soup = get_soup(link)
-        data_html = soup.find('div',class_='items normal').find_all('article')
+        try:   
+            data_html = soup.find('div',class_='items normal').find_all('article')
+        except:
+            data_html = soup.find('div',class_='items full').find_all('article')
         print(f"first page films : {len(data_html)}")
         id_1 = [id_param['id'] for id_param in data_html]
         id.extend(id_1)
@@ -84,7 +87,10 @@ def crawl_id(kind_href: list) -> list:
         print(len(pages))
         for page in pages:
             soup = get_soup(page)
-            data_html = soup.find('div',class_='items normal').find_all('article')
+            try:   
+                data_html = soup.find('div',class_='items normal').find_all('article')
+            except:
+                data_html = soup.find('div',class_='items full').find_all('article')
             print(f"next page film : {len(data_html)}")
             id_2 = [id_param['id'] for id_param in data_html]
             id.extend(id_2)
@@ -104,14 +110,20 @@ def crawl_title(kind_href: list) -> list:
     title = []
     for link in kind_href:
         soup = get_soup(link)
-        data_html = soup.find('div',class_='items normal').find_all('div',class_='data')
+        try:   
+            data_html = soup.find('div',class_='items normal').find_all('data')
+        except:
+            data_html = soup.find('div',class_='items full').find_all('data')
         title_1 = [title_param.find('h3').text for title_param in data_html]
         title.extend(title_1)
         kind = link.split('/')[4]
         pages = get_page(kind=kind,soup=soup)
         for page in pages:
             soup = get_soup(page)
-            data_html = soup.find('div',class_='items normal').find_all('div',class_='data')
+            try:   
+                data_html = soup.find('div',class_='items normal').find_all('data')
+            except:
+                data_html = soup.find('div',class_='items full').find_all('data')
             title_2 = [title_param.find('h3').text for title_param in data_html]
             title.extend(title_2)
     return title
@@ -130,14 +142,20 @@ def crawl_film_link(kind_href: list) -> list:
     film_link = []
     for link in kind_href:
         soup = get_soup(link)
-        data_html = soup.find('div',class_='items normal').find_all('div',class_='data')
+        try:   
+            data_html = soup.find('div',class_='items normal').find_all('data')
+        except:
+            data_html = soup.find('div',class_='items full').find_all('data')
         film_link_1 = [link_param.find('h3').find('a',href=True)['href'] for link_param in data_html]
         film_link.extend(film_link_1)
         kind = link.split('/')[4]
         pages = get_page(kind=kind,soup=soup)
         for page in pages:
             soup = get_soup(page)
-            data_html = soup.find('div',class_='items normal').find_all('div',class_='data')
+            try:   
+                data_html = soup.find('div',class_='items normal').find_all('data')
+            except:
+                data_html = soup.find('div',class_='items full').find_all('data')
             film_link_2 = [link_param.find('h3').find('a',href=True)['href'] for link_param in data_html]
             film_link.extend(film_link_2)
     return film_link
@@ -156,14 +174,20 @@ def crawl_date(kind_href: list) -> list:
     date = []
     for link in kind_href:
         soup = get_soup(link)
-        data_html = soup.find('div',class_='items normal').find_all('div',class_='data')
+        try:   
+            data_html = soup.find('div',class_='items normal').find_all('data')
+        except:
+            data_html = soup.find('div',class_='items full').find_all('data')
         date_1 = [date_param.find('span').text for date_param in data_html]
         date.extend(date_1)
         kind = link.split('/')[4]
         pages = get_page(kind=kind,soup=soup)
         for page in pages:
             soup = get_soup(page)
-            data_html = soup.find('div',class_='items normal').find_all('div',class_='data')
+            try:   
+                data_html = soup.find('div',class_='items normal').find_all('data')
+            except:
+                data_html = soup.find('div',class_='items full').find_all('data')
             date_2 = [date_param.find('span').text for date_param in data_html]
             date.extend(date_2)
     return date
