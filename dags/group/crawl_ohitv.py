@@ -1,5 +1,6 @@
 from airflow.operators.python import PythonOperator
 from airflow.utils.task_group import TaskGroup
+from typing import List
 
 import requests
 from bs4 import BeautifulSoup
@@ -37,7 +38,7 @@ def get_url(ti) -> None:
     kind_href = [link['href'] for link in kind_link]
     ti.xcom_push(key='get_url',value=kind_href)
 
-def get_page(kind: str, soup: BeautifulSoup) -> list:
+def get_page(kind: str, soup: BeautifulSoup) -> List[str]:
     """
     Generates pagination URLs for a given film category.
 
@@ -60,7 +61,7 @@ def get_page(kind: str, soup: BeautifulSoup) -> list:
     return pages
 
 
-def crawl_id(kind_href: list) -> list:
+def crawl_id(kind_href: List[str]) -> List[str]:
     """
     Extracts film IDs from category pages.
 
@@ -96,7 +97,7 @@ def crawl_id(kind_href: list) -> list:
             id.extend(id_2)
     return id
 
-def crawl_title(kind_href: list) -> list:
+def crawl_title(kind_href: List[str]) -> List[str]:
     """
     Extracts film titles from category pages.
 
@@ -128,7 +129,7 @@ def crawl_title(kind_href: list) -> list:
             title.extend(title_2)
     return title
 
-def crawl_film_link(kind_href: list) -> list:
+def crawl_film_link(kind_href: List[str]) -> List[str]:
     """
     Extracts film links from category pages.
 
@@ -160,7 +161,7 @@ def crawl_film_link(kind_href: list) -> list:
             film_link.extend(film_link_2)
     return film_link
 
-def crawl_date(kind_href: list) -> list:
+def crawl_date(kind_href: List[str]) -> List[str]:
     """
     Extracts film release dates from category pages.
 
@@ -192,7 +193,7 @@ def crawl_date(kind_href: list) -> list:
             date.extend(date_2)
     return date
 
-def crawl_rating(kind_href: list) -> list:
+def crawl_rating(kind_href: List[str]) -> List[str]:
     """
     Extracts film ratings from category pages.
 
@@ -218,7 +219,7 @@ def crawl_rating(kind_href: list) -> list:
             rating.extend(rating_2)
     return rating
 
-def crawl_quality(kind_href: list) -> list:
+def crawl_quality(kind_href: List[str]) -> List[str]:
     """
     Extracts film qualities from category pages.
 
@@ -244,7 +245,7 @@ def crawl_quality(kind_href: list) -> list:
             quality.extend(quality_2)
     return quality
 
-def crawl_genre(kind_href: list) -> list:
+def crawl_genre(kind_href: List[str]) -> List[str]:
     """
     Extracts film genres from category pages.
 
@@ -272,7 +273,7 @@ def crawl_genre(kind_href: list) -> list:
                 genre.append(sub_type)
     return genre
 
-def crawl_short_description(kind_href: list) -> list:
+def crawl_short_description(kind_href: List[str]) -> List[str]:
     """
     Extracts short descriptions of films from category pages.
 
