@@ -18,6 +18,7 @@ def get_soup(url: str) -> BeautifulSoup:
 
     html = requests.get(url)
     soup = BeautifulSoup(html.text,'html.parser')
+
     return soup
 
 def get_url(ti) -> None:
@@ -33,9 +34,11 @@ def get_url(ti) -> None:
 
     url = "https://ohitv.cc/"
     soup = get_soup(url)
+    
     kind_menu = soup.find_all('ul',class_='sub-menu')[1].find_all('a',href=True)
     kind_link = [link for link in kind_menu]
     kind_href = [link['href'] for link in kind_link]
+    
     ti.xcom_push(key='get_url',value=kind_href)
 
 def get_page(kind: str, soup: BeautifulSoup) -> List[str]:
@@ -58,6 +61,7 @@ def get_page(kind: str, soup: BeautifulSoup) -> List[str]:
         number_of_page = 1
     for page_number in range(1, int(number_of_page) + 1):
         pages.append(f"https://ohitv.info/the-loai/{kind}/page/{page_number}")
+
     return pages
 
 
@@ -95,6 +99,7 @@ def crawl_id(kind_href: List[str]) -> List[str]:
             print(f"next page film : {len(data_html)}")
             id_2 = [id_param['id'] for id_param in data_html]
             id.extend(id_2)
+
     return id
 
 def crawl_title(kind_href: List[str]) -> List[str]:
@@ -127,6 +132,7 @@ def crawl_title(kind_href: List[str]) -> List[str]:
                 data_html = soup.find('div',class_='items full').find_all('data')
             title_2 = [title_param.find('h3').text for title_param in data_html]
             title.extend(title_2)
+
     return title
 
 def crawl_film_link(kind_href: List[str]) -> List[str]:
@@ -159,6 +165,7 @@ def crawl_film_link(kind_href: List[str]) -> List[str]:
                 data_html = soup.find('div',class_='items full').find_all('data')
             film_link_2 = [link_param.find('h3').find('a',href=True)['href'] for link_param in data_html]
             film_link.extend(film_link_2)
+
     return film_link
 
 def crawl_date(kind_href: List[str]) -> List[str]:
@@ -191,6 +198,7 @@ def crawl_date(kind_href: List[str]) -> List[str]:
                 data_html = soup.find('div',class_='items full').find_all('data')
             date_2 = [date_param.find('span').text for date_param in data_html]
             date.extend(date_2)
+
     return date
 
 def crawl_rating(kind_href: List[str]) -> List[str]:
@@ -217,6 +225,7 @@ def crawl_rating(kind_href: List[str]) -> List[str]:
             rating_data = soup.find_all('div',class_='rating')
             rating_2 = [rating_param.text for rating_param in rating_data]
             rating.extend(rating_2)
+
     return rating
 
 def crawl_quality(kind_href: List[str]) -> List[str]:
@@ -243,6 +252,7 @@ def crawl_quality(kind_href: List[str]) -> List[str]:
             quality_data = soup.find_all('div',class_='mepo')
             quality_2 = [quality_param.text for quality_param in quality_data]
             quality.extend(quality_2)
+
     return quality
 
 def crawl_genre(kind_href: List[str]) -> List[str]:
@@ -271,6 +281,7 @@ def crawl_genre(kind_href: List[str]) -> List[str]:
             for genre_data_sub in genre_data:
                 sub_type = [text.text for text in genre_data_sub]
                 genre.append(sub_type)
+
     return genre
 
 def crawl_short_description(kind_href: List[str]) -> List[str]:
@@ -297,10 +308,12 @@ def crawl_short_description(kind_href: List[str]) -> List[str]:
             short_des_data = soup.find_all('div',class_='texto')
             short_des_2 = [short.text for short in short_des_data]
             short_des.extend(short_des_2)
+
     return short_des
 
 def crawl_all(ti) -> None:
     kind_href = ti.xcom_pull(key='get_url',task_ids='crawling.get_url')
+
     id = crawl_id(kind_href=kind_href)
     title = crawl_title(kind_href=kind_href)
     film_link = crawl_film_link(kind_href=kind_href)
@@ -309,13 +322,14 @@ def crawl_all(ti) -> None:
     quality = crawl_quality(kind_href=kind_href)
     genre = crawl_genre(kind_href=kind_href)
     short_des = crawl_short_description(kind_href=kind_href)
+    
     print("Going to push xcom...")
     ti.xcom_push(key='crawl',value=list(zip(id, title, film_link, date, rating, quality, genre, short_des)))
 
 def crawl_tasks():
     with TaskGroup(
-            group_id="crawling",
-            tooltip="Crawling Ohitv"
+        group_id="crawling",
+        tooltip="Crawling Ohitv"
     ) as group:
 
         get_url_task = PythonOperator(
