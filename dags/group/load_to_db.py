@@ -3,6 +3,11 @@ from airflow.utils.task_group import TaskGroup
 from plugins.minio_service import create_client
 from plugins.minio_service import create_bucket_minio
 from pymongo import MongoClient
+import pandas as pd
+from io import BytesIO
+from datetime import datetime
+from sqlalchemy import create_engine
+from sqlalchemy.exc import ProgrammingError
 
 
 def load_to_postgres(username: str, 
@@ -31,14 +36,10 @@ def load_to_postgres(username: str,
     Returns:
     - None: The function performs database operations and does not return a value.
     """
-    import pandas as pd
-    from io import BytesIO
-    from datetime import datetime
-    from sqlalchemy import create_engine
-    from sqlalchemy.exc import ProgrammingError
 
     minio_bucket = 'ohitv-processed'
     client = create_client()
+
     create_bucket_minio(client=client, minio_bucket=minio_bucket)
 
     processed_ohitv_object = client.get_object(minio_bucket,"ohitv_request_processed.parquet")
@@ -118,12 +119,10 @@ def load_to_mongodb(username: str,
     - None: This function does not return a value but performs database operations, 
             including inserting records into the MongoDB collection.
     """
-    import pandas as pd
-    from io import BytesIO
-    from datetime import datetime
 
     minio_bucket = 'ohitv-processed'
     client = create_client()
+
     create_bucket_minio(client=client, minio_bucket=minio_bucket)
 
     processed_ohitv_object = client.get_object(minio_bucket,"ohitv_request_processed.parquet")
@@ -174,8 +173,8 @@ def load_tasks():
     mongodb_password = keys['mongodb_password']
 
     with TaskGroup(
-            group_id="load",
-            tooltip="load dataframe to postgres"
+        group_id="load",
+        tooltip="load dataframe to postgres"
     ) as group:
 
         load_to_postgres_task = PythonOperator(
