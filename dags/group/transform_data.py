@@ -2,6 +2,9 @@ from airflow.operators.python import PythonOperator
 from airflow.utils.task_group import TaskGroup
 from plugins.minio_service import create_client
 from plugins.minio_service import create_bucket_minio
+import pandas as pd
+import io
+from io import BytesIO
 
 def convert_to_dataframe(ti) -> None:
     """
@@ -10,9 +13,6 @@ def convert_to_dataframe(ti) -> None:
     Returns:
         None
     """    
-    
-    import pandas as pd
-    import io
 
     minio_bucket = 'ohitv-raw'
     client = create_client()
@@ -39,10 +39,6 @@ def processing() -> None:
         None
     """    
 
-    import pandas as pd
-    import io
-    from io import BytesIO
-
     minio_bucket = 'ohitv-raw'
     client = create_client()
     create_bucket_minio(client=client,minio_bucket=minio_bucket)
@@ -68,8 +64,8 @@ def processing() -> None:
 
 def processing_tasks():
     with TaskGroup(
-            group_id="processing",
-            tooltip="processing dataframe"
+        group_id="processing",
+        tooltip="processing dataframe"
     ) as group:
 
         convert_to_dataframe_task = PythonOperator(
