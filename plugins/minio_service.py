@@ -1,3 +1,4 @@
+import json
 from minio import Minio
 from minio.error import S3Error
 
@@ -8,11 +9,9 @@ def create_client() -> Minio:
     Returns:
         Minio: The MinIO client instance.
     """
-
-    import json
-
     with open('plugins/keys.json', 'r', encoding='utf-8') as file:
         keys = json.load(file)
+
     access_key = keys['access_key']
     secret_key = keys['secret_key']
     client = Minio(
@@ -23,8 +22,8 @@ def create_client() -> Minio:
     )
 
     return client
-def create_bucket_minio(client: Minio,
-                        minio_bucket: str) -> None:
+
+def create_bucket_minio(client: Minio, minio_bucket: str) -> None:
     """
     Creates a MinIO bucket if it doesn't exist. Logs a message if the bucket already exists.
     
@@ -40,3 +39,4 @@ def create_bucket_minio(client: Minio,
             print(f"Bucket '{minio_bucket}' already exists.")
     except S3Error as e:
         print(f"Error occurred: {e}")
+
